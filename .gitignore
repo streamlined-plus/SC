@@ -6,3 +6,6 @@ Thumbs.db
 
 # build output (assembled by ./build.sh, deployed by `wix release`)
 dist/
+
+# deps
+node_modules/

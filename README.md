@@ -23,10 +23,17 @@ The site is a **Wix-managed headless project**. `wix.config.json` links this
 repo to it, so `wix release` updates the *existing* site in place.
 
 ```bash
-./build.sh            # assemble ./dist
-npx wix login         # browser auth, once per machine
-npx wix release       # deploy + publish + clear CDN cache
+npm install           # installs @wix/cli (once)
+npm run login         # browser auth, once per machine
+npm run deploy        # build + deploy + publish + clear CDN cache
 ```
+
+Requires **Node 20.11.0 or higher** (`node -v` to check).
+
+Without `npm install`, `npx wix` fails with *"could not determine executable
+to run"* — npx looks for a package called `wix`, but the binary ships in
+`@wix/cli`. To run it without installing, name the package in full:
+`npx @wix/cli@latest release`.
 
 `wix release` prints the live URL when it finishes. If you deploy and still see
 the old content, run `npx wix release` again — it clears the site cache.
@@ -36,8 +43,9 @@ the old content, run `npx wix release` again — it clears the site cache.
 `wix login` also takes an API key, so no browser is needed:
 
 ```bash
+npm install
 npx wix login --api-key "$WIX_API_KEY"
-npx wix release
+npm run deploy
 ```
 
 Create the key in the Wix dashboard under **Settings → API Keys**. Keep it in
@@ -66,5 +74,4 @@ is for the first upload only. Updating an existing site is `wix release`.
 
 ## Editing
 
-Every page is a self-contained HTML file. Edit, run `./build.sh`, then
-`npx wix release`.
+Every page is a self-contained HTML file. Edit, then `npm run deploy`.
