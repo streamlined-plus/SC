@@ -1,35 +1,70 @@
 # Streamlined Content — site
 
-Static site for **streamlinedcontent.com**. Two pages, no build step, no dependencies.
+Static site for **streamlinedcontent.com**. No build step, no dependencies.
 
 ```
-index.html            homepage
-services/index.html   the four service pages (#websites, #local-search, #content-systems, #lead-automation)
-CNAME                 tells GitHub Pages to serve at www.streamlinedcontent.com
-.nojekyll             serve files as-is
+index.html                     homepage
+services/index.html            services hub
+services/websites/             \
+services/local-search/          |  one page per service
+services/content-systems/       |
+services/lead-automation/      /
 robots.txt, sitemap.xml
+build.sh                       assembles ./dist (selects what ships)
+wix.config.json                links this repo to the live Wix headless project
 ```
 
-## Deploy with GitHub Pages (one-time)
+All internal links are **relative** and name `index.html` explicitly, so the
+site works whether or not it is served from the domain root.
 
-1. Push this to the `main` branch.
-2. Repo **Settings → Pages** → Source: *Deploy from a branch* → Branch: `main` / `/ (root)` → Save.
-3. Under **Custom domain** it should already read `www.streamlinedcontent.com` (from CNAME). Tick **Enforce HTTPS** once the certificate is issued (a few minutes).
+## Deploying
 
-## Point the domain at it
+The site is a **Wix-managed headless project**. `wix.config.json` links this
+repo to it, so `wix release` updates the *existing* site in place.
 
-At your DNS provider (or in Wix → Domains, switch the domain to *point to another host*):
+```bash
+./build.sh            # assemble ./dist
+npx wix login         # browser auth, once per machine
+npx wix release       # deploy + publish + clear CDN cache
+```
 
-| Type  | Host | Value |
-|-------|------|-------|
-| CNAME | www  | `<your-github-username>.github.io` |
-| A     | @    | 185.199.108.153 |
-| A     | @    | 185.199.109.153 |
-| A     | @    | 185.199.110.153 |
-| A     | @    | 185.199.111.153 |
+`wix release` prints the live URL when it finishes. If you deploy and still see
+the old content, run `npx wix release` again — it clears the site cache.
 
-Apex (`streamlinedcontent.com`) then redirects to `www`. Propagation is usually under an hour.
+### Deploying from CI or an AI agent
+
+`wix login` also takes an API key, so no browser is needed:
+
+```bash
+npx wix login --api-key "$WIX_API_KEY"
+npx wix release
+```
+
+Create the key in the Wix dashboard under **Settings → API Keys**. Keep it in
+an environment variable or secret store — never commit it.
+
+### Do not use the drop page for updates
+
+https://www.wix.com/headless/drop creates a **brand new site every time**. It
+is for the first upload only. Updating an existing site is `wix release`.
+
+## The live project
+
+| | |
+|---|---|
+| Site ID | `43940c7f-f343-4fb6-a32a-27a1fa3ccee9` |
+| OAuth client (`appId`) | `b40a1002-9c0a-41ad-99ca-d17a046f829f` |
+| Domain | www.streamlinedcontent.com (Premium) |
+| Editor type | Editorless (Wix-managed headless) |
+
+> **Note:** this is *not* the Wix Git Integration / Velo setup. That is a
+> different mechanism for editor-built sites, and it reads only `src/pages`,
+> `src/backend` and `src/public` — it ignores root HTML files entirely. An
+> earlier `wix.config.json` in this repo pointed at the old Wix Studio site
+> (`7a44fe51-…`) through that system, which is why pushing HTML here never
+> changed anything.
 
 ## Editing
 
-Every page is a single self-contained HTML file — edit, commit, and it's live in about a minute. No Wix, no publish button.
+Every page is a self-contained HTML file. Edit, run `./build.sh`, then
+`npx wix release`.
