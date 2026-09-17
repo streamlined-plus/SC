@@ -1,13 +1,18 @@
 {
-  "devDependencies": {
-    "@wix/cli": "^1.0.0",
-    "@wix/eslint-plugin-cli": "^1.0.0",
-    "eslint": "^8.25.0",
-    "react": "16.14.0"
-  },
+  "name": "streamlinedcontent-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static site for streamlinedcontent.com, deployed to a Wix-managed headless project",
   "scripts": {
-    "postinstall": "wix sync-types",
-    "dev": "wix dev",
-    "lint": "eslint ."
+    "build": "./build.sh",
+    "login": "wix login",
+    "deploy": "./build.sh && wix release",
+    "preview": "./build.sh && wix preview"
+  },
+  "devDependencies": {
+    "@wix/cli": "^1.1.247"
+  },
+  "engines": {
+    "node": ">=20.11.0"
   }
 }

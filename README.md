@@ -1,45 +1,77 @@
-# Git Integration & Wix CLI <img align="left" src="https://user-images.githubusercontent.com/89579857/185785022-cab37bf5-26be-4f11-85f0-1fac63c07d3b.png">
+# Streamlined Content — site
 
-This repo is part of Git Integration & Wix CLI, a set of tools that allows you to write, test, and publish code for your Wix site locally on your computer. 
+Static site for **streamlinedcontent.com**. No build step, no dependencies.
 
-Connect your site to GitHub, develop in your favorite IDE, test your code in real time, and publish your site from the command line.
+```
+index.html                     homepage
+services/index.html            services hub
+services/websites/             \
+services/local-search/          |  one page per service
+services/content-systems/       |
+services/lead-automation/      /
+robots.txt, sitemap.xml
+build.sh                       assembles ./dist (selects what ships)
+wix.config.json                links this repo to the live Wix headless project
+```
 
-## Set up this repository in your IDE
-This repo is connected to a Wix site. That site tracks this repo's default branch. Any code committed and pushed to that branch from your local IDE appears on the site.
+All internal links are **relative** and name `index.html` explicitly, so the
+site works whether or not it is served from the domain root.
 
-Before getting started, make sure you have the following things installed:
-* [Git](https://git-scm.com/download)
-* [Node](https://nodejs.org/en/download/), version 14.8 or later.
-* [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [yarn](https://yarnpkg.com/getting-started/install)
-* An SSH key [added to your GitHub account](https://docs.github.com/en/authentication/connecting-to-github-with-ssh/adding-a-new-ssh-key-to-your-github-account).
+## Deploying
 
-To set up your local environment and start coding locally, do the following:
+The site is a **Wix-managed headless project**. `wix.config.json` links this
+repo to it, so `wix release` updates the *existing* site in place.
 
-1. Open your terminal and navigate to where you want to store the repo.
-1. Clone the repo by running `git clone <your-repository-url>`.
-1. Navigate to the repo's directory by running `cd <directory-name>`.
-1. Install the repo's dependencies by running `npm install` or `yarn install`.
-1. Install the Wix CLI by running `npm install -g @wix/cli` or `yarn global add @wix/cli`.  
-   Once you've installed the CLI globally, you can use it with any Wix site's repo.
+```bash
+npm install           # installs @wix/cli (once)
+npm run login         # browser auth, once per machine
+npm run deploy        # build + deploy + publish + clear CDN cache
+```
 
-For more information, see [Setting up Git Integration & Wix CLI](https://support.wix.com/en/article/velo-setting-up-git-integration-wix-cli-beta).
+Requires **Node 20.11.0 or higher** (`node -v` to check).
 
-## Write Velo code in your IDE
-Once your repo is set up, you can write code in it as you would in any other non-Wix project. The repo's file structure matches the [public](https://support.wix.com/en/article/velo-working-with-the-velo-sidebar#public), [backend](https://support.wix.com/en/article/velo-working-with-the-velo-sidebar#backend), and [page code](https://support.wix.com/en/article/velo-working-with-the-velo-sidebar#page-code) sections in Editor X.
+Without `npm install`, `npx wix` fails with *"could not determine executable
+to run"* — npx looks for a package called `wix`, but the binary ships in
+`@wix/cli`. To run it without installing, name the package in full:
+`npx @wix/cli@latest release`.
 
-Learn more about [this repo's file structure](https://support.wix.com/en/article/velo-understanding-your-sites-github-repository-beta).
+`wix release` prints the live URL when it finishes. If you deploy and still see
+the old content, run `npx wix release` again — it clears the site cache.
 
-## Test your code with the Local Editor
-The Local Editor allows you test changes made to your site in real time. The code in your local IDE is synced with the Local Editor, so you can test your changes before committing them to your repo. You can also change the site design in the Local Editor and sync it with your IDE.
+### Deploying from CI or an AI agent
 
-Start the Local Editor by navigating to this repo's directory in your terminal and running `wix dev`.
+`wix login` also takes an API key, so no browser is needed:
 
-For more information, see [Working with the Local Editor](https://support.wix.com/en/article/velo-working-with-the-local-editor-beta).
+```bash
+npm install
+npx wix login --api-key "$WIX_API_KEY"
+npm run deploy
+```
 
-## Preview and publish with the Wix CLI
-The Wix CLI is a tool that allows you to work with your site locally from your computer's terminal. You can use it to build a preview version of your site and publish it. You can also use the CLI to install [approved npm packages](https://support.wix.com/en/article/velo-working-with-npm-packages) to your site.
+Create the key in the Wix dashboard under **Settings → API Keys**. Keep it in
+an environment variable or secret store — never commit it.
 
-Learn more about [working with the Wix CLI](https://support.wix.com/en/article/velo-working-with-the-wix-cli-beta).
+### Do not use the drop page for updates
 
-## Invite contributors to work with you
-Git Integration & Wix CLI extends Editor X's [concurrent editing](https://support.wix.com/en/article/editor-x-about-concurrent-editing) capabilities. Invite other developers as collaborators on your [site](https://support.wix.com/en/article/inviting-people-to-contribute-to-your-site) and your [GitHub repo](https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-access-to-your-personal-repositories/inviting-collaborators-to-a-personal-repository). Multiple developers can work on a site's code at once.
+https://www.wix.com/headless/drop creates a **brand new site every time**. It
+is for the first upload only. Updating an existing site is `wix release`.
+
+## The live project
+
+| | |
+|---|---|
+| Site ID | `43940c7f-f343-4fb6-a32a-27a1fa3ccee9` |
+| OAuth client (`appId`) | `b40a1002-9c0a-41ad-99ca-d17a046f829f` |
+| Domain | www.streamlinedcontent.com (Premium) |
+| Editor type | Editorless (Wix-managed headless) |
+
+> **Note:** this is *not* the Wix Git Integration / Velo setup. That is a
+> different mechanism for editor-built sites, and it reads only `src/pages`,
+> `src/backend` and `src/public` — it ignores root HTML files entirely. An
+> earlier `wix.config.json` in this repo pointed at the old Wix Studio site
+> (`7a44fe51-…`) through that system, which is why pushing HTML here never
+> changed anything.
+
+## Editing
+
+Every page is a self-contained HTML file. Edit, then `npm run deploy`.

@@ -1,4 +1,8 @@
 {
-  "siteId": "7a44fe51-7771-457b-bcdd-868ccf7aac7a",
-  "uiVersion": "32"
+  "projectType": "Site",
+  "appId": "b40a1002-9c0a-41ad-99ca-d17a046f829f",
+  "siteId": "43940c7f-f343-4fb6-a32a-27a1fa3ccee9",
+  "site": {
+    "outputDirectory": "./dist"
+  }
 }
